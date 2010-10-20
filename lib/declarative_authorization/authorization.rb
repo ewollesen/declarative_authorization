@@ -22,6 +22,9 @@ module Authorization
 
   AUTH_DSL_FILES = [Pathname.new(Rails.root || '').join("config", "authorization_rules.rb").to_s] unless defined? AUTH_DSL_FILES
 
+  autoload :ActiveRecordAuthorization, File.join(File.dirname(__FILE__), "orms/active_record.rb")
+  autoload :DataMapperAuthorization, File.join(File.dirname(__FILE__), "orms/data_mapper.rb")
+
   # Controller-independent method for retrieving the current user.
   # Needed for model security where the current controller is not available.
   def self.current_user
@@ -52,17 +55,40 @@ module Authorization
     @@dot_path = path
   end
 
-  @@orm = :active_record
+  def self.setup
+    yield self
+  end
+
+  mattr_accessor :orm
+  @@orm = nil
+
   def self.orm
+    if @@orm.nil?
+      @@orm = :active_record
+      load_orm(@@orm)
+    end
     @@orm
   end
 
-  def self.orm=(orm)
-    orm = orm.to_sym
-    unless [:active_record,].include?(orm)
-      raise NotImplementedError.new("ORM #{orm} is not supported")
+  def self.load_orm(orm_to_load)
+    case orm_to_load
+    when :data_mapper
+      ::DataMapper::Resource.send(:include, AuthorizationInModel)
+    when :active_record
+      ::ActiveRecord::Base.send(:include, AuthorizationInModel)
+    else
+      raise NotImplementedError.new("Unsupported ORM #{orm_to_load}")
     end
-    @@orm = orm
+  end
+
+  def self.orm=(orm_to_set)
+    orm_to_set = orm_to_set.to_sym
+    unless [:active_record, :data_mapper].include?(orm_to_set)
+      raise NotImplementedError.new("ORM #{orm_to_set} is not supported")
+    end
+    load_orm(orm_to_set)
+    $stderr.puts "\n\n\n\nORM SET\n\n\n\n"
+    @@orm = orm_to_set
   end
 
   # Authorization::Engine implements the reference monitor.  It may be used

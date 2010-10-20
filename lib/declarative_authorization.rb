@@ -12,10 +12,3 @@ require File.join(%w{declarative_authorization railsengine}) if defined?(::Rails
 
 ActionController::Base.send :include, Authorization::AuthorizationInController
 ActionController::Base.helper Authorization::AuthorizationHelper
-
-case Authorization.orm
-when :active_record
-  ActiveRecord::Base.send :include, Authorization::AuthorizationInModel
-else
-  raise NotImplementedError.new("Unhandled ORM #{Authorization.orm}")
-end
