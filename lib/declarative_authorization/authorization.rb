@@ -22,6 +22,7 @@ module Authorization
 
   AUTH_DSL_FILES = [Pathname.new(Rails.root || '').join("config", "authorization_rules.rb").to_s] unless defined? AUTH_DSL_FILES
 
+  autoload :Orms, File.join(File.dirname(__FILE__), "orms.rb")
   autoload :ActiveRecordAuthorization, File.join(File.dirname(__FILE__), "orms/active_record.rb")
   autoload :DataMapperAuthorization, File.join(File.dirname(__FILE__), "orms/data_mapper.rb")
 
@@ -79,6 +80,7 @@ module Authorization
     else
       raise NotImplementedError.new("Unsupported ORM #{orm_to_load}")
     end
+    orm_to_load
   end
 
   def self.orm=(orm_to_set)
@@ -86,9 +88,8 @@ module Authorization
     unless [:active_record, :data_mapper].include?(orm_to_set)
       raise NotImplementedError.new("ORM #{orm_to_set} is not supported")
     end
-    load_orm(orm_to_set)
-    $stderr.puts "\n\n\n\nORM SET\n\n\n\n"
     @@orm = orm_to_set
+    load_orm(@@orm)
   end
 
   # Authorization::Engine implements the reference monitor.  It may be used

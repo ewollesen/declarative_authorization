@@ -43,7 +43,6 @@ module Authorization
 
           obligation_scope = ObligationScope.new( options[:model], {} )
           obs = engine.obligations( privileges, :user => options[:user], :context => options[:context] )
-          Rails.logger.debug("AR OBLIGATIONS:\n#{obs.pretty_inspect}")
           engine.obligations( privileges, :user => options[:user], :context => options[:context] ).each do |obligation|
             obligation_scope.parse!( obligation )
           end

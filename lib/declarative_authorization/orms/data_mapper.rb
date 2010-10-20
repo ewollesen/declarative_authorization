@@ -1,8 +1,8 @@
 module Authorization
   module DataMapperAuthorization
+
     def self.included(base)
       base.send(:extend, ClassMethods)
-      base.send(:include, InstanceMethods)
     end
 
     module ClassMethods
@@ -50,7 +50,6 @@ module Authorization
                                     :context => context})
 
         obligations = engine.obligations(privileges, :user => user, :context => context)
-        Rails.logger.debug("OBLIGATIONS:\n#{obligations.pretty_inspect}")
         convert_obligations_to_scopes(obligations)
       end
 
@@ -64,8 +63,6 @@ module Authorization
       end
 
       def convert_obligation_to_scope(obligation)
-        Rails.logger.debug "==== obligation:\n#{obligation.pretty_inspect}"
-
         scope = {}
         obligation.each_pair do |context, comparison|
           case comparison
@@ -78,7 +75,6 @@ module Authorization
           end
         end
 
-        Rails.logger.debug("==== scope:\n#{scope.pretty_inspect}")
         return scope
       end
 
@@ -93,15 +89,10 @@ module Authorization
       end
 
       def logical_or_scopes(scopes)
-        Rails.logger.debug("== OR'ing:\n#{scopes.pretty_inspect}")
         scopes.map! {|scope| self.all(scope)}
         scopes.inject {|combined, scope| combined + scope}.all
       end
 
     end
-
-    module InstanceMethods
-    end
   end
 end
-
