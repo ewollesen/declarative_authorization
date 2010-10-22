@@ -81,7 +81,7 @@ module Authorization
       def parse_comparison(comparison)
         operator, value = comparison
         case operator
-        when :is
+        when :is, :is_in
           value
         else
           raise NotImplementedError.new("Don't know how to handle operator #{operator.pretty_inspect}")
