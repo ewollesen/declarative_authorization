@@ -3,7 +3,7 @@ module Authorization
     module DataMapperInterface
 
       def find(model_class, id)
-        model_class.send(:get, id)
+        model_class.send(:get!, id)
       end
 
     end
