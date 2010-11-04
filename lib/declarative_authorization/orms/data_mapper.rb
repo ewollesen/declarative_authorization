@@ -89,8 +89,8 @@ module Authorization
       end
 
       def logical_or_scopes(scopes)
-        scopes.map! {|scope| self.all(scope)}
-        scopes.inject {|combined, scope| combined + scope}.all
+        i = scopes.map {|scope| self.all(scope)}
+        i.inject {|combined, scope| scope.empty? ? combined : combined + scope}
       end
 
     end
